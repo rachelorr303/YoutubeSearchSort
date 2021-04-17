@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 using namespace std;
 
 class Node {
@@ -37,16 +38,26 @@ Node::Node() {
 }
 
 class BST {
+private:
+    int getDislikeRatio(Node*);
 public:
     BST();
     Node *root;
+    vector<Node*> chanVids;
+    vector<Node*> viewsRange;
     Node* insert(string trend, string title, string chan, string pub, int time, string day, int tags, int v, int ls, int dls, int cc, Node* curr);
     Node* searchTitle(string title, int v, Node*);
-    void searchChannel(string chan, Node*);
+    vector<Node*> searchByViews(int views, Node*);
+    vector<Node*> searchChannel(string chan, Node*);
 };
 
 BST::BST() {
     root = nullptr;
+}
+
+int BST::getDislikeRatio(Node *curr) {
+    int ratio = curr->likes/curr->dislikes;
+    return ratio;
 }
 
 Node *
@@ -85,8 +96,31 @@ Node* BST::searchTitle(string title, int views, Node *curr) {
     return temp;
 }
 
-void BST::searchChannel(string chan, Node *) {
-    return;
+vector<Node*> BST::searchChannel(string chan, Node *curr) {
+    if(curr == nullptr) {
+        return chanVids; //make sure to clear chanVids before using it again
+    }
+    else if(curr->channel==chan) {
+        chanVids.push_back(curr);
+    }
+    else {
+        searchChannel(chan, curr->left);
+        searchChannel(chan, curr->right);
+    }
+    return chanVids;
+}
+
+vector<Node*> BST::searchByViews(int maxViews, Node *curr) {
+    if(curr == nullptr) {
+        return viewsRange;
+    }
+    else if(curr->views < maxViews) {
+        chanVids.push_back(curr);
+    }
+    else {
+        searchByViews(maxViews, curr->left);
+        searchByViews(maxViews, curr->right);
+    }
 }
 
 int main() {
