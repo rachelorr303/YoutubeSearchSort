@@ -13,62 +13,27 @@ int BST::getDislikeRatio(Node *curr) {
     return ratio;
 }
 
+
 Node *
-BST::insertByViews(string trend, string title, string chan, string pub, int time, string day, vector<string> tags, int v, int ls, int dls,
-            int cc, Node* curr) {
+BST::insertByViews(string &trend, string &title, string &chan, string &pub, int &time, string &day, int &v, int &ls, int &dls,
+            int &cc, Node* curr) {
     if(searchTitle(title, v, curr) == nullptr) {
         if(curr == nullptr) { //current node is empty or its root of tree
-            curr = new Node(trend, title, chan, pub, time, day, tags, v, ls, dls, cc);
+            curr = new Node(trend, title, chan, pub, time, day, v, ls, dls, cc);
             return curr;
         }
         else if(curr->views > v){ //store new node in left subtree
-            curr->left = insertByViews(trend, title, chan, pub, time, day, tags, v, ls, dls, cc, curr->left);
+            curr->left = insertByViews(trend, title, chan, pub, time, day, v, ls, dls, cc, curr->left);
         }
         else if(curr->views < v){ //store new node in right subtree
-            curr->right = insertByViews(trend, title, chan, pub, time, day, tags, v, ls, dls, cc, curr->right);
+            curr->right = insertByViews(trend, title, chan, pub, time, day, v, ls, dls, cc, curr->right);
         }
     }
     return curr;
 }
 
-Node *
-BST::insertByLikes(string trend, string title, string chan, string pub, int time, string day, vector<string> tags, int v, int ls, int dls,
-                   int cc, Node* curr) {
-    if(searchTitle(title, v, curr) == nullptr) {
-        if(curr == nullptr) { //current node is empty or its root of tree
-            curr = new Node(trend, title, chan, pub, time, day, tags, v, ls, dls, cc);
-            return curr;
-        }
-        else if(curr->likes > ls){ //store new node in left subtree
-            curr->left = insertByLikes(trend, title, chan, pub, time, day, tags, v, ls, dls, cc, curr->left);
-        }
-        else if(curr->likes < ls){ //store new node in right subtree
-            curr->right = insertByLikes(trend, title, chan, pub, time, day, tags, v, ls, dls, cc, curr->right);
-        }
-    }
-    return curr;
-}
-
-Node *
-BST::insertByComments(string trend, string title, string chan, string pub, int time, string day, vector<string> tags, int v, int ls, int dls,
-                   int cc, Node* curr) {
-    if(searchTitle(title, v, curr) == nullptr) {
-        if(curr == nullptr) { //current node is empty or its root of tree
-            curr = new Node(trend, title, chan, pub, time, day, tags, v, ls, dls, cc);
-            return curr;
-        }
-        else if(curr->likes > ls){ //store new node in left subtree
-            curr->left = insertByComments(trend, title, chan, pub, time, day, tags, v, ls, dls, cc, curr->left);
-        }
-        else if(curr->likes < ls){ //store new node in right subtree
-            curr->right = insertByComments(trend, title, chan, pub, time, day, tags, v, ls, dls, cc, curr->right);
-        }
-    }
-    return curr;
-}
-
-Node* BST::searchTitle(string title, int views, Node *curr) {
-    Node* temp = new Node();
+Node* BST::searchTitle(string &title, int &views, Node *curr) {
+    Node* temp;
     if (curr == nullptr) {
         cout << "Title not found." << endl;
         return nullptr;
@@ -85,9 +50,34 @@ Node* BST::searchTitle(string title, int views, Node *curr) {
     return temp;
 }
 
-vector<Node*> BST::searchChannel(string chan, Node *curr) {
+void BST::searchTitle(string &title, Node * curr) {
+    string temp;
+    if (curr == nullptr) {
+        return;
+    }
+    if(curr->title.compare(title)==0) {
+
+    }
+    else {
+        searchTitle(title, curr->left);
+        searchTitle(title, curr->right);
+    }
+
+}
+
+void BST::searchKey(string &key, Node *curr) {
     if(curr == nullptr) {
-        return chanVids; //make sure to clear chanVids before using it again
+        return;
+    }
+    else if(curr->title.find(key) != string::npos) {
+
+    }
+}
+
+
+void BST::searchChannel(string &chan, Node *curr) {
+    if(curr == nullptr) {
+        return; //make sure to clear chanVids before using it again
     }
     else if(curr->channel==chan) {
         chanVids.push_back(curr);
@@ -96,19 +86,96 @@ vector<Node*> BST::searchChannel(string chan, Node *curr) {
         searchChannel(chan, curr->left);
         searchChannel(chan, curr->right);
     }
-    return chanVids;
 }
 
-vector<Node*> BST::searchByViews(int maxViews, Node *curr) {
-    if(curr == nullptr) {
-        return viewsRange;
-    }
-    else if(curr->views < maxViews) {
-        chanVids.push_back(curr);
-    }
-    else {
-        searchByViews(maxViews, curr->left);
-        searchByViews(maxViews, curr->right);
+void BST::searchByViewRange(int &min, int &max, Node *curr) {
+    if (curr == nullptr) {
+        return;
+    } else if (min <= curr->views && curr->views < max) {
+        viewsRange.push_back(curr);
+    } else {
+        searchByViewRange(min, max, curr->left);
+        searchByViewRange(min, max, curr->right);
     }
 }
+
+void BST::readFile() {
+    string read;
+    string data;
+    Node *curr = new Node();
+    if(!file.is_open()) {
+        cout << "Could not open file youtube.csv." << endl;
+    }
+    if(file.is_open()) {
+        getline(file, read); //get rid of title line
+        while(!file.fail()) {
+            getline(file, read);
+            istringstream stream(read);
+
+            //Trending date
+            getline(stream, data, ',');
+            curr->trending = data;
+
+            //Title
+            getline(stream, data, ',');
+            curr->title = data;
+
+            //Channel Name
+            getline(stream, data, ',');
+            curr->channel = data;
+
+            //Published date
+            getline(stream, data, ',');
+            curr->published = data;
+
+            //Time frame
+            getline(stream, data, ',');
+            curr->time = data;
+
+            //Published day
+            getline(stream, data, ',');
+            curr->day = data;
+
+            //views
+            getline(stream, data, ',');
+            try {
+                curr->views = stoi(data);
+            }
+            catch(exception &err) {
+                cout << "Failed to convert views to an int." << endl;
+            }
+
+            //likes
+            getline(stream, data, ',');
+            try {
+                curr->likes = stoi(data);
+            }
+            catch(exception &err) {
+                cout << "Failed to convert likes to an int." << endl;
+            }
+
+            //dislikes
+            getline(stream, data, ',');
+            try {
+                curr->dislikes = stoi(data);
+            }
+            catch(exception &err) {
+                cout << "Failed to convert dislikes to an int." << endl;
+            }
+
+            //comments
+            getline(stream, data, ',');
+            try {
+                curr->comments = stoi(data);
+            }
+            catch(exception &err) {
+                cout << "Failed to convert comments to an int." << endl;
+            }
+
+            //insertion here
+        }
+        file.close();
+    }
+}
+
 

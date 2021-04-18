@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 class Node {
@@ -9,9 +11,8 @@ public:
     string title;
     string channel;
     string published;
-    int time;
+    string time;
     string day;
-    vector<string> tags;
     int views;
     int likes;
     int dislikes;
@@ -19,7 +20,7 @@ public:
     Node *left;
     Node *right;
     Node();
-    Node(string trend, string tile, string chan, string pub, int tm, string da, vector<string> tgs, int v, int ls, int dls, int cc) : trending(trend), title(tile), channel(chan), published(pub), time(tm), day(da), tags(tgs), views(v), likes(ls), dislikes(dls), comments(cc) {}
+    Node(string trend, string tile, string chan, string pub, string tm, string da, int v, int ls, int dls, int cc) : trending(trend), title(tile), channel(chan), published(pub), time(tm), day(da), views(v), likes(ls), dislikes(dls), comments(cc) {}
 };
 
 Node::Node() {
@@ -27,7 +28,7 @@ Node::Node() {
     title = "";
     channel = "";
     published = "";
-    time = 0;
+    time = "";
     day = "";
     views = 0;
     likes = 0;
@@ -43,13 +44,16 @@ private:
 public:
     BST();
     Node *root;
+    vector<Node*> keyVids;
     vector<Node*> chanVids;
     vector<Node*> viewsRange;
-    Node* insertByViews(string, string, string, string, int, string, vector<string>, int, int, int, int, Node*);
-    Node* insertByLikes(string, string, string, string, int, string, vector<string>, int, int, int, int, Node*);
-    Node* insertByComments(string, string, string, string, int, string, vector<string>, int, int, int, int, Node*);
-    Node* searchTitle(string title, int v, Node*);
-    vector<Node*> searchByViews(int views, Node*);
-    vector<Node*> searchChannel(string chan, Node*);
+    Node* insertByViews(string&, string&, string&, string&, int&, string&, int&, int&, int&, int&, Node*);
+    Node* searchTitle(string&, int&, Node*);
+    void searchTitle(string&, Node*);
+    void searchKey(string&, Node*);
+    void searchByViewRange(int&, int&, Node*);
+    void searchChannel(string&, Node*);
+    void readFile();
+    ifstream file;
 };
 
