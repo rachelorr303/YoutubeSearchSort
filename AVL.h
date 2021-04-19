@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <sstream>
+#include <fstream>
 #include "Node.h"
 using namespace std;
 
@@ -13,8 +15,10 @@ public:
     vector<Node*> keywords;
     vector<Node*> channels;
     vector<Node*> ranges;
+    ifstream file;
     AvlTree();
     Node* insertViews(string trend, string title_, string chan, string pub, string t, string d, long v, long l, long dl, int c, Node* root);
+    bool titleExist(string t, Node* node);
     void searchTitle(string t, Node* node, bool& found);
     void searchWord(string key, Node* node);
     void searchChannel(string chan, Node* node);
@@ -25,4 +29,5 @@ public:
     Node* rightRotation(Node* node);
     void printInfo(Node* node);
     void getStats(vector<Node*> group);
+    void readFile();
 };
