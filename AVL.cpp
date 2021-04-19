@@ -39,7 +39,7 @@ Node* AvlTree::rightRotation(Node* node) {
 }
 
 void AvlTree::searchTitle(string t, Node* node, bool& found) {
-    if(node == nullptr) {
+    if(node == nullptr || found) {
         //cout << "Title not found" << endl;
         return;
     }
@@ -79,11 +79,22 @@ void AvlTree::searchViews(int max, int min, Node* node) {
     searchViews(max, min, node->right);
 }
 
+bool AvlTree::titleExist(string t, Node* node) {
+    if(node == nullptr)
+        return false;
+    if(node->title == t)
+        return true;
+    bool res1 = titleExist(t, node->left);
+    if(res1)
+        return true;
+    return titleExist(t, node->right);
+}
+
 Node* AvlTree::insertViews(string trend, string title_, string chan, string pub, string t, string d, long v, long l, long dl, int c, Node* rootNode){
-    bool found = false;
-    searchTitle(title_, rootNode, found);
-    if(found) { // check if title already exists
-        cout << "Video already exists" << endl;
+    //bool found = false;
+    //searchTitle(title_, rootNode, found);
+    if(titleExist(title_, rootNode)) { // check if title already exists
+        //cout << "Video already exists" << endl;
         return rootNode;
     }
 
@@ -93,7 +104,7 @@ Node* AvlTree::insertViews(string trend, string title_, string chan, string pub,
         root = insertion;
 
     if(rootNode == nullptr) {
-        cout << "successful" << endl;
+        //cout << "successful" << endl;
         return insertion;
     }
     else if (v < rootNode->views) { // should i do <= ??
@@ -119,8 +130,6 @@ Node* AvlTree::insertViews(string trend, string title_, string chan, string pub,
     return rootNode;
 }
 
-
-
 void AvlTree::printInfo(Node* node) {
     string newT = "";
     newT = node->trending.substr(3, 2) + "/" + node->trending.substr(6, 2) + "/" + node->trending.substr(0, 2);
@@ -139,11 +148,12 @@ void AvlTree::printInfo(Node* node) {
     else
         cout << "Published: " << node->day << " " << node->time << ", " << newP << endl;
     cout << "Trending on: " << newT << endl;
+    cout << "\n" << endl;
 }
 
 void AvlTree::getStats(vector<Node*> group) {
     cout << "Stats for " << group.size() << " videos:" << endl;
-    int avgViews = 0;
+    long avgViews = 0;
     int avgLikes = 0;
     int avgDislikes = 0;
     int avgComments = 0;
@@ -166,7 +176,7 @@ void AvlTree::getStats(vector<Node*> group) {
     avgDislikes = avgDislikes / group.size();
     cout << "Average dislikes: " << avgDislikes << endl;
 
-    cout << "Like to dislike ratio: " << avgLikes/avgDislikes << endl;
+    cout << "Like to dislike ratio: " << avgLikes/avgDislikes << ":1" << endl;
 
     avgComments = avgComments / group.size();
     cout << "Average comments: " << avgComments << endl;
@@ -194,4 +204,117 @@ void AvlTree::getStats(vector<Node*> group) {
 
 AvlTree::AvlTree() {
     root = nullptr;
+}
+
+void AvlTree::readFile() {
+    string read;
+    string data;
+    string trending;
+    string title;
+    string channel;
+    string published;
+    string time;
+    string day;
+    int views = 0;
+    int likes = 0;
+    int dislikes = 0;
+    int comments = 0;
+    int hour;
+    int i = 1;
+    if(!file.is_open()) {
+        cout << "Could not open file youtube.tsv." << endl;
+    }
+    if(file.is_open()) {
+        getline(file, read); //get rid of title line
+        while(!file.fail() && i < 10000) {
+            getline(file, read);
+            istringstream stream(read);
+
+            //Trending date
+            getline(stream, data, '\t');
+            trending = data;
+
+            //Title
+            getline(stream, data, '\t');
+            title = data;
+
+            //Channel Name
+            getline(stream, data, '\t');
+            channel = data;
+
+            //Published date
+            getline(stream, data, '\t');
+            published = data;
+
+            //Time frame
+            getline(stream, data, ':');
+            try {
+                hour = stoi(data);
+                if(5 <= hour && hour <= 12) {
+                    time = "morning";
+                }
+                else if(13 <= hour && hour <= 17) {
+                    time = "afternoon";
+                }
+                else if((18 <= hour && hour <= 23) || (0 <= hour && hour <= 4)) {
+                    time = "night";
+                }
+            }
+            catch(exception &err) {
+                cout << i << endl;
+                cout << "Failed to convert time of day to an int." << endl;
+            }
+
+            getline(stream, data, '\t'); //move on from time of day section
+
+            //Published day
+            getline(stream, data, '\t');
+            day = data;
+
+            //views
+            getline(stream, data, '\t');
+            try {
+                views = stoi(data);
+            }
+            catch(exception &err) {
+                cout << i << endl;
+                cout << "Failed to convert views to an int." << endl;
+            }
+
+            //likes
+            getline(stream, data, '\t');
+            try {
+                likes = stoi(data);
+            }
+            catch(exception &err) {
+                cout << i << endl;
+                cout << "Failed to convert likes to an int." << endl;
+            }
+
+            //dislikes
+            getline(stream, data, '\t');
+            try {
+                dislikes = stoi(data);
+            }
+            catch(exception &err) {
+                cout << i << endl;
+                cout << "Failed to convert dislikes to an int." << endl;
+            }
+
+            //comments
+            getline(stream, data, '\t');
+            try {
+                comments = stoi(data);
+            }
+            catch(exception &err) {
+                cout << i << endl;
+                cout << "Failed to convert comments to an int." << endl;
+            }
+
+            //insertion here
+            root = insertViews(trending, title, channel, published, time, day, views, likes, dislikes, comments, root);
+            i++;
+        }
+        file.close();
+    }
 }
