@@ -40,7 +40,6 @@ Node* AvlTree::rightRotation(Node* node) {
 
 Node* AvlTree::searchTitle(string t, int v, Node* node){
     if(node == nullptr) {
-        cout << "Title not found." << endl;
         return nullptr;
     }
     else if(node->title == t)
@@ -51,38 +50,51 @@ Node* AvlTree::searchTitle(string t, int v, Node* node){
         return searchTitle(t, v, node->right);
 }
 
-// Search for student by id
-// Return true if found
-void AvlTree::searchWord(string key, Node* node, vector<Node*>& all){
+void AvlTree::searchTitle2(string t, Node* node) {
+    if(node == nullptr)
+        return;
+    else if(node->title == t) {
+        printInfo(node);
+    }
+    searchTitle2(t, node->left);
+    searchTitle2(t, node->right);
+}
+
+void AvlTree::searchWord(string key, Node* node){
     if(node == nullptr)
         return;
     else if(node->title.find(key) != string::npos) {
-        all.push_back(node);
+        keywords.push_back(node);
     }
-    searchWord(key, node->left, all);
-    searchWord(key, node->right, all);
+    searchWord(key, node->left);
+    searchWord(key, node->right);
 }
 
-void AvlTree::searchChannel(string chan, Node* node, vector<Node*>& all) {
+void AvlTree::searchChannel(string chan, Node* node) {
     if(node == nullptr)
         return;
     else if(node->channel == chan)
-        all.push_back(node);
-    searchChannel(chan, node->left, all);
-    searchChannel(chan, node->right, all);
+        channels.push_back(node);
+    searchChannel(chan, node->left);
+    searchChannel(chan, node->right);
 }
 
-// Insert node with name and id into tree
-// Balance if necessary
+void AvlTree::searchViews(int max, int min, Node* node) {
+    if(node == nullptr)
+        return;
+    else if(node->views < max && node->views > min)
+        ranges.push_back(node);
+    searchViews(max, min, node->left);
+    searchViews(max, min, node->right);
+}
 
-Node* AvlTree::insertViews(string trend, string title_, string chan, string pub, int t, string d, long v, long l, long dl, int c, vector<string> tag, Node* rootNode){
-    //insert, assign BF, balance
-    if(searchTitle(title_, v, rootNode) != nullptr) { // if id already exists
+Node* AvlTree::insertViews(string trend, string title_, string chan, string pub, string t, string d, long v, long l, long dl, int c, vector<string> tag, Node* rootNode){
+    if(searchTitle(title_, v, rootNode) != nullptr) { // check if title already exists
         cout << "unsuccessful" << endl;
         return rootNode;
     }
 
-    Node* insertion = new Node(trend, title_, chan, pub, t, d, v, l, dl, c, tag);
+    Node* insertion = new Node(trend, title_, chan, pub, t, d, v, l, dl, c);
 
     if(root == nullptr)
         root = insertion;
@@ -114,71 +126,21 @@ Node* AvlTree::insertViews(string trend, string title_, string chan, string pub,
     return rootNode;
 }
 
-Node* AvlTree::insertLikes(string trend, string title_, string chan, string pub, int t, string d, long v, long l, long dl, int c, vector<string> tag, Node* rootNode) {
-    Node* insertion = new Node(trend, title_, chan, pub, t, d, v, l, dl, c, tag);
-
-    if(root == nullptr)
-        root = insertion;
-
-    if(rootNode == nullptr) {
-        cout << "successful" << endl;
-        return insertion;
-    }
-    else if (l/dl < rootNode->ratio) {
-        rootNode->left = insertLikes(trend, title_, chan, pub, t, d, v, l, dl, c, tag, rootNode->left);
-    }
-    else if (l/dl > rootNode->ratio)
-        rootNode->right = insertLikes(trend, title_, chan, pub, t, d, v, l, dl, c, tag, rootNode->right);
-
-    // BALANCE
-    int BF = findBF(rootNode);
-    if (BF > 1 && l/dl < rootNode->left->ratio) // left left
-        return rightRotation(rootNode);
-    if (BF < -1 && l/dl > rootNode->right->ratio) // right right
-        return leftRotation(rootNode);
-    if (BF > 1 && l/dl > rootNode->left->ratio) { // left right
-        rootNode->left = leftRotation(rootNode->left);
-        return rightRotation(rootNode);
-    }
-    if (BF < -1 && l/dl < rootNode->right->ratio) { // right left
-        rootNode->right = rightRotation(rootNode->right);
-        return leftRotation(rootNode);
-    }
-    return rootNode;
-}
 
 
-Node* AvlTree::insertCom(string trend, string title_, string chan, string pub, int t, string d, long v, long l, long dl, int c, vector<string> tag, Node* rootNode) {
-    Node* insertion = new Node(trend, title_, chan, pub, t, d, v, l, dl, c, tag);
+void AvlTree::printInfo(Node* node) {
+    string newT = "";
+    newT = node->trending.substr(5, 2) + "/" + node->trending.substr(8, 2) + "/" + node->trending.substr(2, 2);
+    string newP = "";
+    newP = node->published.substr(6,2) + "/" + node->published.substr(3, 2) + "/" + node->published.substr(0, 2);
 
-    if(root == nullptr)
-        root = insertion;
-
-    if(rootNode == nullptr) {
-        cout << "successful" << endl;
-        return insertion;
-    }
-    else if (c < rootNode->comments) {
-        rootNode->left = insertCom(trend, title_, chan, pub, t, d, v, l, dl, c, tag, rootNode->left);
-    }
-    else if (c > rootNode->comments)
-        rootNode->right = insertCom(trend, title_, chan, pub, t, d, v, l, dl, c, tag, rootNode->right);
-
-    // BALANCE
-    int BF = findBF(rootNode);
-    if (BF > 1 && c < rootNode->left->comments) // left left
-        return rightRotation(rootNode);
-    if (BF < -1 && c > rootNode->right->comments) // right right
-        return leftRotation(rootNode);
-    if (BF > 1 && c > rootNode->left->comments) { // left right
-        rootNode->left = leftRotation(rootNode->left);
-        return rightRotation(rootNode);
-    }
-    if (BF < -1 && c < rootNode->right->comments) { // right left
-        rootNode->right = rightRotation(rootNode->right);
-        return leftRotation(rootNode);
-    }
-    return rootNode;
+    cout << node->title << " published by " << node->channel << endl;
+    cout << "Views: " << node->views << endl;
+    cout << "Likes: " << node->likes << endl;
+    cout << "Dislikes: " << node->dislikes << endl;
+    cout << "Number of comments: " << node->comments << endl;
+    cout << "Published: " << node->day << " " << node->time << ", " << newP << endl; // need to format
+    cout << "Trending on: " << newT << endl;
 }
 
 
