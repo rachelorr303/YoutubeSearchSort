@@ -3,15 +3,14 @@
 
 class BST {
 private:
-    int getDislikeRatio(Node*);
+    int avgStat(Node*);
 public:
     BST();
     Node *root;
-    vector<Node*> keyVids;
-    vector<Node*> chanVids;
-    vector<Node*> viewsRange;
+    vector<Node*> vids;
     Node* insert(string, string, string, string, string, string, int, int, int, int, Node*);
     //bool searchTitle(string, Node*);
+    void getStats(vector<Node*> group);
     void searchTitleMenu(string, Node*);
     void searchKey(string, Node*);
     void searchByViewRange(int, int, Node*);

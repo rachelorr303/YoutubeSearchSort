@@ -8,9 +8,55 @@ BST::BST() {
     root = nullptr;
 }
 
-int BST::getDislikeRatio(Node *curr) {
-    int ratio = curr->likes/curr->dislikes;
-    return ratio;
+void BST::getStats(vector<Node*> group) {
+    cout << "Stats for " << group.size() << " videos:" << endl;
+    int avgViews = 0;
+    int avgLikes = 0;
+    int avgDislikes = 0;
+    int avgComments = 0;
+    unordered_map<string, int> dow;
+    unordered_map<string, int> tod;
+    for(int i = 0; i < group.size(); i++) {
+        avgViews += group[i]->views;
+        avgLikes += group[i]->likes;
+        avgDislikes += group[i]->dislikes;
+        avgComments += group[i]->comments;
+        ++dow[group[i]->day];
+        ++tod[group[i]->time];
+    }
+    avgViews = avgViews/ group.size();
+    cout << "Average views: " << avgViews << endl;
+
+    avgLikes = avgLikes / group.size();
+    cout << "Average likes: " << avgLikes << endl;
+
+    avgDislikes = avgDislikes / group.size();
+    cout << "Average dislikes: " << avgDislikes << endl;
+
+    cout << "Like to dislike ratio: " << avgLikes/avgDislikes << ":1" << endl;
+
+    avgComments = avgComments / group.size();
+    cout << "Average comments: " << avgComments << endl;
+
+    int max = 0;
+    string maxKey;
+    for(auto iter = dow.begin(); iter != dow.end(); iter++) {
+        if(iter->second > max) {
+            maxKey = iter->first;
+            max = iter->second;
+        }
+    }
+    cout << "Most common day of the week to post: " << maxKey << endl;
+
+    max = 0;
+    maxKey = "";
+    for(auto iter2 = tod.begin(); iter2 != tod.end(); iter2++) {
+        if(iter2->second > max) {
+            maxKey = iter2->first;
+            max = iter2->second;
+        }
+    }
+    cout << "Most common time of day to post: " << maxKey << endl;
 }
 
  Node* BST::insert(string trend, string title, string chan, string pub, string time, string day, int views, int likes, int dislikes, int comments, Node *curr) {
@@ -30,21 +76,6 @@ int BST::getDislikeRatio(Node *curr) {
     return curr;
 }
 
-/*bool BST::searchTitle(string title, Node *curr) {
-    bool found;
-    if(curr == nullptr) {
-        found = false;
-    }
-    else if(curr->title == title) {
-        found = true;
-    }
-    else {
-        found = searchTitle(title, curr->left);
-        found = searchTitle(title, curr->right);
-    }
-    return found;
-}*/
-
 void BST::searchTitleMenu(string title, Node *curr) {
     if (curr == nullptr) {
         return;
@@ -52,11 +83,8 @@ void BST::searchTitleMenu(string title, Node *curr) {
     if(curr->title==title) {
         printInfo(curr);
     }
-    else {
-        searchTitleMenu(title, curr->left);
-        searchTitleMenu(title, curr->right);
-    }
-    return;
+    searchTitleMenu(title, curr->left);
+    searchTitleMenu(title, curr->right);
 }
 
 void BST::searchKey(string key, Node *curr) {
@@ -64,12 +92,11 @@ void BST::searchKey(string key, Node *curr) {
         return;
     }
     if(curr->title.find(key) != string::npos) {
-        keyVids.push_back(curr);
+        vids.push_back(curr);
         printInfo(curr);
     }
     searchKey(key, curr->left);
     searchKey(key, curr->right);
-    return;
 }
 
 
@@ -78,30 +105,31 @@ void BST::searchChannel(string chan, Node *curr) {
         return; //make sure to clear chanVids before using it again
     }
     if(curr->channel==chan) {
-        chanVids.push_back(curr);
+        vids.push_back(curr);
         printInfo(curr);
     }
     searchChannel(chan, curr->left);
     searchChannel(chan, curr->right);
-    return;
 }
 
 void BST::searchByViewRange(int min, int max, Node *curr) {
     if (curr == nullptr) {
         return;
-    } else if (min <= curr->views && curr->views < max) {
-        viewsRange.push_back(curr);
-    } else {
-        searchByViewRange(min, max, curr->left);
-        searchByViewRange(min, max, curr->right);
     }
+    if (min <= curr->views && curr->views < max) {
+        vids.push_back(curr);
+    }
+    searchByViewRange(min, max, curr->left);
+    searchByViewRange(min, max, curr->right);
 }
 
 void BST::printInfo(Node* node) {
+    //year, day, month to month, day, year
     string newT = "";
-    newT = node->trending.substr(5, 2) + "/" + node->trending.substr(8, 2) + "/" + node->trending.substr(2, 2);
+    newT = node->trending.substr(6, 2) + "/" + node->trending.substr(3, 2) + "/20" + node->trending.substr(0, 2);
+    //day, month, year to month, day, year
     string newP = "";
-    newP = node->published.substr(6,2) + "/" + node->published.substr(3, 2) + "/" + node->published.substr(0, 2);
+    newP = node->published.substr(3,2) + "/" + node->published.substr(0, 2) + "/" + node->published.substr(6, 4);
 
     cout << node->title << " published by " << node->channel << endl;
     cout << "Views: " << node->views << endl;
@@ -110,6 +138,7 @@ void BST::printInfo(Node* node) {
     cout << "Number of comments: " << node->comments << endl;
     cout << "Published: " << node->day << " " << node->time << ", " << newP << endl; // need to format
     cout << "Trending on: " << newT << endl;
+    cout << endl;
 }
 
 Node* BST::readFile() {
@@ -132,7 +161,7 @@ Node* BST::readFile() {
     }
     if(file.is_open()) {
         getline(file, read); //get rid of title line
-        while(!file.fail() && i < 300) {
+        while(!file.fail() && i < 20) {
             getline(file, read);
             istringstream stream(read);
 
