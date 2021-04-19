@@ -13,29 +13,22 @@ int BST::getDislikeRatio(Node *curr) {
     return ratio;
 }
 
-
-Node *
-BST::insertByViews(string &trend, string &title, string &chan, string &pub, int &time, string &day, int &v, int &ls, int &dls,
-            int &cc, Node* curr) {
-    if(searchTitle(title, v, curr) == nullptr) {
-        if(curr == nullptr) { //current node is empty or its root of tree
-            curr = new Node(trend, title, chan, pub, time, day, v, ls, dls, cc);
-            return curr;
-        }
-        else if(curr->views > v){ //store new node in left subtree
-            curr->left = insertByViews(trend, title, chan, pub, time, day, v, ls, dls, cc, curr->left);
-        }
-        else if(curr->views < v){ //store new node in right subtree
-            curr->right = insertByViews(trend, title, chan, pub, time, day, v, ls, dls, cc, curr->right);
-        }
+void BST::insertByViews(Node* insert, Node *curr) {
+    if(curr==nullptr) {
+        curr = insert;
+        return;
     }
-    return curr;
+    else if(insert->views <= curr->views) {
+        insertByViews(insert, curr->left);
+    }
+    else if(insert->views > curr->views) {
+        insertByViews(insert, curr->right);
+    }
 }
 
 Node* BST::searchTitle(string &title, int &views, Node *curr) {
     Node* temp;
     if (curr == nullptr) {
-        cout << "Title not found." << endl;
         return nullptr;
     }
     else if(curr->title==title) { //if current node's name is equal to searched name
@@ -56,7 +49,7 @@ void BST::searchTitle(string &title, Node * curr) {
         return;
     }
     if(curr->title.compare(title)==0) {
-
+        //print function
     }
     else {
         searchTitle(title, curr->left);
@@ -102,6 +95,7 @@ void BST::searchByViewRange(int &min, int &max, Node *curr) {
 void BST::readFile() {
     string read;
     string data;
+    int hour;
     Node *curr = new Node();
     if(!file.is_open()) {
         cout << "Could not open file youtube.csv." << endl;
@@ -129,8 +123,23 @@ void BST::readFile() {
             curr->published = data;
 
             //Time frame
-            getline(stream, data, ',');
-            curr->time = data;
+            getline(stream, data, ':');
+            try {
+                hour = stoi(data);
+                if(5 <= hour && hour <= 12) {
+                    curr->time = "morning";
+                }
+                else if(13 <= hour && hour <= 17) {
+                    curr->time = "afternoon";
+                }
+                else if((18 <= hour && hour <= 23) || (0 <= hour && hour <= 4)) {
+                    curr->time = "night";
+                }
+            }
+            catch(exception &err) {
+                cout << "Failed to convert time of day to an int." << endl;
+            }
+            getline(stream, data, ','); //move on from time of day section
 
             //Published day
             getline(stream, data, ',');
@@ -173,6 +182,10 @@ void BST::readFile() {
             }
 
             //insertion here
+            if(searchTitle(curr->title, curr->views, root) == nullptr) { //node doesn't exist in tree
+                insertByViews(curr, root);
+                //delete curr;
+            }
         }
         file.close();
     }

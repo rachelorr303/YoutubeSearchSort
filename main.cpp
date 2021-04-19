@@ -5,10 +5,13 @@
 
 int main() {
     BST bstObj;
-
     int input;
     int max, min;
-    string search = "";
+
+    bstObj.file.open("youtube.csv");
+    bstObj.readFile();
+    string search;
+
     do {
         cout << "Welcome to the Viral Video-inator!" << endl;
         cout << "Please select one of the options below. Searches are case sensitive" << endl;

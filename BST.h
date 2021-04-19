@@ -20,6 +20,7 @@ public:
     Node *left;
     Node *right;
     Node();
+    ~Node();
     Node(string trend, string tile, string chan, string pub, string tm, string da, int v, int ls, int dls, int cc) : trending(trend), title(tile), channel(chan), published(pub), time(tm), day(da), views(v), likes(ls), dislikes(dls), comments(cc) {}
 };
 
@@ -38,6 +39,10 @@ Node::Node() {
     right = nullptr;
 }
 
+Node::~Node() {
+
+}
+
 class BST {
 private:
     int getDislikeRatio(Node*);
@@ -47,7 +52,7 @@ public:
     vector<Node*> keyVids;
     vector<Node*> chanVids;
     vector<Node*> viewsRange;
-    Node* insertByViews(string&, string&, string&, string&, int&, string&, int&, int&, int&, int&, Node*);
+    void insertByViews(Node*, Node*);
     Node* searchTitle(string&, int&, Node*);
     void searchTitle(string&, Node*);
     void searchKey(string&, Node*);
