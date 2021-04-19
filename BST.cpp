@@ -59,25 +59,25 @@ void BST::getStats(vector<Node*> group) {
     cout << "Most common time of day to post: " << maxKey << endl;
 }
 
- Node* BST::insert(string trend, string title, string chan, string pub, string time, string day, int views, int likes, int dislikes, int comments, Node *curr) {
-     if (curr == nullptr) {
-         return new Node(trend, title, chan, pub, time, day, views, likes, dislikes, comments);
-     }
-     if(curr->title == title) {
-         curr->trending = trend;
-         curr->views = views;
-         curr->likes = likes;
-         curr->dislikes = dislikes;
-         curr->comments = comments;
-         return curr;
-     }
-     if(views <= curr->views) { // <= in the event two unique videos coincidentally have the same view count
-         curr->left = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->left);
-     }
-     else {
-         curr->right = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->right);
-     }
-     return curr;
+Node* BST::insert(string trend, string title, string chan, string pub, string time, string day, int views, int likes, int dislikes, int comments, Node *curr) {
+    if (curr == nullptr) {
+        return new Node(trend, title, chan, pub, time, day, views, likes, dislikes, comments);
+    }
+    if(curr->title == title) {
+        curr->trending = trend;
+        curr->views = views;
+        curr->likes = likes;
+        curr->dislikes = dislikes;
+        curr->comments = comments;
+        return curr;
+    }
+    if(views <= curr->views) { // <= in the event two unique videos coincidentally have the same view count
+        curr->left = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->left);
+    }
+    else {
+        curr->right = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->right);
+    }
+    return curr;
 }
 
 /*string BST::searchDupe(string trend, string title, string chan, int views, int likes, int dislikes, int comments, Node *curr) {
@@ -103,15 +103,15 @@ void BST::getStats(vector<Node*> group) {
 }*/
 
 
-void BST::searchTitleMenu(string title, Node *curr) {
+void BST::searchTitle(string title, Node *curr) {
     if (curr == nullptr) {
         return;
     }
     if(curr->title==title) {
         printInfo(curr);
     }
-    searchTitleMenu(title, curr->left);
-    searchTitleMenu(title, curr->right);
+    searchTitle(title, curr->left);
+    searchTitle(title, curr->right);
 }
 
 void BST::searchKey(string key, Node *curr) {
@@ -138,15 +138,15 @@ void BST::searchChannel(string chan, Node *curr) {
     searchChannel(chan, curr->right);
 }
 
-void BST::searchByViewRange(int min, int max, Node *curr) {
+void BST::searchViews(int min, int max, Node *curr) {
     if (curr == nullptr) {
         return;
     }
     if (min <= curr->views && curr->views <= max) {
         vids.push_back(curr);
     }
-    searchByViewRange(min, max, curr->left);
-    searchByViewRange(min, max, curr->right);
+    searchViews(min, max, curr->left);
+    searchViews(min, max, curr->right);
 }
 
 void BST::printInfo(Node* node) {

@@ -38,24 +38,23 @@ Node* AvlTree::rightRotation(Node* node) {
     return newNode;
 }
 
-void AvlTree::searchTitle(string t, Node* node, bool& found) {
-    if(node == nullptr || found) {
+void AvlTree::searchTitle(string t, Node* node) {
+    if(node == nullptr) {
         //cout << "Title not found" << endl;
         return;
     }
-    else if(node->title == t) {
+    if(node->title == t) {
         printInfo(node);
-        found = true;
     }
-    searchTitle(t, node->left, found);
-    searchTitle(t, node->right, found);
+    searchTitle(t, node->left);
+    searchTitle(t, node->right);
 }
 
 void AvlTree::searchWord(string key, Node* node){
     if(node == nullptr)
         return;
     else if(node->title.find(key) != string::npos) {
-        keywords.push_back(node);
+        vids.push_back(node);
     }
     searchWord(key, node->left);
     searchWord(key, node->right);
@@ -65,29 +64,29 @@ void AvlTree::searchChannel(string chan, Node* node) {
     if(node == nullptr)
         return;
     else if(node->channel == chan)
-        channels.push_back(node);
+        vids.push_back(node);
     searchChannel(chan, node->left);
     searchChannel(chan, node->right);
 }
 
-void AvlTree::searchViews(int max, int min, Node* node) {
+void AvlTree::searchViews(int min, int max, Node* node) {
     if(node == nullptr)
         return;
     else if(node->views < max && node->views > min)
-        ranges.push_back(node);
+        vids.push_back(node);
     searchViews(max, min, node->left);
     searchViews(max, min, node->right);
 }
 
-bool AvlTree::titleExist(string t, Node* node) {
+bool AvlTree::titleExist(string title_, Node* node) {
     if(node == nullptr)
         return false;
-    if(node->title == t)
+    if(node->title == title_)
         return true;
-    bool res1 = titleExist(t, node->left);
+    bool res1 = titleExist(title_, node->left);
     if(res1)
         return true;
-    return titleExist(t, node->right);
+    return titleExist(title_, node->right);
 }
 
 Node* AvlTree::insertViews(string trend, string title_, string chan, string pub, string t, string d, long v, long l, long dl, int c, Node* rootNode){
@@ -97,20 +96,14 @@ Node* AvlTree::insertViews(string trend, string title_, string chan, string pub,
         //cout << "Video already exists" << endl;
         return rootNode;
     }
-
-    Node* insertion = new Node(trend, title_, chan, pub, t, d, v, l, dl, c);
-
-    if(root == nullptr)
-        root = insertion;
-
     if(rootNode == nullptr) {
         //cout << "successful" << endl;
-        return insertion;
+        return new Node(trend, title_, chan, pub, t, d, v, l, dl, c);;
     }
-    else if (v < rootNode->views) { // should i do <= ??
+    if (v <= rootNode->views) { // should i do <= ??
         rootNode->left = insertViews(trend, title_, chan, pub, t, d, v, l, dl, c, rootNode->left);
     }
-    else if (v > rootNode->views)
+    else
         rootNode->right = insertViews(trend, title_, chan, pub, t, d, v, l, dl, c, rootNode->right);
 
     // BALANCE
@@ -206,7 +199,7 @@ AvlTree::AvlTree() {
     root = nullptr;
 }
 
-void AvlTree::readFile() {
+Node* AvlTree::readFile() {
     string read;
     string data;
     string trending;
@@ -226,7 +219,7 @@ void AvlTree::readFile() {
     }
     if(file.is_open()) {
         getline(file, read); //get rid of title line
-        while(!file.fail() && i < 10000) {
+        while(!file.fail() && i < 100000) {
             getline(file, read);
             istringstream stream(read);
 
@@ -317,4 +310,5 @@ void AvlTree::readFile() {
         }
         file.close();
     }
+    return root;
 }

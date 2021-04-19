@@ -1,14 +1,18 @@
 #include <iostream>
 #include <string>
 #include "BST.h"
+#include "AVL.h"
 
 int main() {
     BST bstObj;
+    AvlTree avlObj;
     int input;
     int max, min;
 
-    bstObj.file.open("/Users/moniquehuang/CLionProjects/BST/youtube.tsv");
-    bstObj.root = bstObj.readFile();
+    avlObj.file.open("/Users/moniquehuang/CLionProjects/BST/youtube.tsv");
+    avlObj.root = avlObj.readFile();
+    //bstObj.file.open("/Users/moniquehuang/CLionProjects/BST/youtube.tsv");
+    //bstObj.root = bstObj.readFile();
     string search;
 
     cout << "Welcome to the Viral Video-inator!" << endl;
@@ -25,28 +29,41 @@ int main() {
             case 1:
                 cout << "Enter video title: ";
                 getline(cin >> ws, search);
-                bstObj.searchTitleMenu(search, bstObj.root);
+                cout << "AVL Tree Search: " << endl;
+                avlObj.searchTitle(search, avlObj.root);
+                //cout << "Binary Tree Search: " << endl;
+                //bstObj.searchTitle(search, bstObj.root);
                 break;
             case 2:
                 cout << "Enter keyword: ";
                 getline(cin >> ws, search);
-                bstObj.searchKey(search, bstObj.root);
-                if(!bstObj.vids.empty()) {
+                cout << "AVL Tree search: " << endl;
+                avlObj.searchWord(search, avlObj.root);
+                //bstObj.searchKey(search, bstObj.root);
+                if(!avlObj.vids.empty()) {
+                    avlObj.getStats(avlObj.vids);
+                    avlObj.vids.clear();
+                }
+                else {
+                    cout << "No videos were found with " << search << " in the title." << endl;
+                }
+                /*if(!bstObj.vids.empty()) {
                     bstObj.getStats(bstObj.vids);
                     bstObj.vids.clear();
                 }
                 else {
                     cout << "No videos were found with " << search << " in the title." << endl;
-                }
+                }*/
                 cout << endl;
                 break;
             case 3:
                 cout << "Enter channel name: ";
                 getline(cin >> ws, search);
-                bstObj.searchChannel(search, bstObj.root);
-                if(!bstObj.vids.empty()) {
-                    bstObj.getStats(bstObj.vids);
-                    bstObj.vids.clear();
+                avlObj.searchChannel(search, avlObj.root);
+                //bstObj.searchChannel(search, bstObj.root);
+                if(!avlObj.vids.empty()) {
+                    avlObj.getStats(avlObj.vids);
+                    avlObj.vids.clear();
                 }
                 else {
                     cout << "No channels were found under the name " << search << "." << endl;
@@ -58,14 +75,22 @@ int main() {
                 cin >> max;
                 cout << "Input the minimum view count: ";
                 cin >> min;
-                bstObj.searchByViewRange(min, max, bstObj.root);
+                avlObj.searchViews(max, min, avlObj.root);
+                if(!avlObj.vids.empty()) {
+                    avlObj.getStats(avlObj.vids);
+                    avlObj.vids.clear();
+                }
+                else {
+                    cout << "No videos are within the range " << min << " and " << max << "." << endl;
+                }
+                /*bstObj.searchByViewRange(min, max, bstObj.root);
                 if(!bstObj.vids.empty()) {
                     bstObj.getStats(bstObj.vids);
                     bstObj.vids.clear();
                 }
                 else {
                     cout << "No videos are within the range " << min << " and " << max << "." << endl;
-                }
+                }*/
                 cout << endl;
                 break;
             case 5:
