@@ -10,12 +10,12 @@ BST::BST() {
 
 void BST::getStats(vector<Node*> group) {
     cout << "Stats for " << group.size() << " videos:" << endl;
-    int avgViews = 0;
-    int avgLikes = 0;
-    int avgDislikes = 0;
-    int avgComments = 0;
-    unordered_map<string, int> dow;
-    unordered_map<string, int> tod;
+    long avgViews = 0;
+    long avgLikes = 0;
+    long avgDislikes = 0;
+    long avgComments = 0;
+    unordered_map<string, long> dow;
+    unordered_map<string, long> tod;
     for(int i = 0; i < group.size(); i++) {
         avgViews += group[i]->views;
         avgLikes += group[i]->likes;
@@ -60,21 +60,48 @@ void BST::getStats(vector<Node*> group) {
 }
 
  Node* BST::insert(string trend, string title, string chan, string pub, string time, string day, int views, int likes, int dislikes, int comments, Node *curr) {
-    if(curr==nullptr) {
-        curr = new Node(trend, title, chan, pub, time, day, views, likes, dislikes, comments);
-    }
-    else if(curr->title == title && curr->channel == chan) {
-        Node* temp = new Node(trend, title, chan, pub, time, day, views, likes, dislikes, comments);
-        curr = temp;
-    }
-    else if(views <= curr->views) {
-        curr->left = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->left);
-    }
-    else if(views >= curr->views) {
-        curr->right = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->right);
-    }
-    return curr;
+     if (curr == nullptr) {
+         return new Node(trend, title, chan, pub, time, day, views, likes, dislikes, comments);
+     }
+     if(curr->title == title) {
+         curr->trending = trend;
+         curr->views = views;
+         curr->likes = likes;
+         curr->dislikes = dislikes;
+         curr->comments = comments;
+         return curr;
+     }
+     if(views <= curr->views) { // <= in the event two unique videos coincidentally have the same view count
+         curr->left = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->left);
+     }
+     else {
+         curr->right = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->right);
+     }
+     return curr;
 }
+
+/*string BST::searchDupe(string trend, string title, string chan, int views, int likes, int dislikes, int comments, Node *curr) {
+    string msg;
+    if (curr == nullptr) {
+        return "";
+    }
+    else if(curr->title==title && curr->channel==chan) {
+        curr->trending = trend;
+        curr->views = views;
+        curr->likes = likes;
+        curr->dislikes = dislikes;
+        curr->comments = comments;
+        msg = "found";
+    }
+    else if(views < curr->views) {
+        msg += searchDupe(trend, title, chan, views, likes, dislikes, comments, curr->left);
+    }
+    else {
+        msg += searchDupe(trend, title, chan, views, likes, dislikes, comments, curr->right);
+    }
+    return msg;
+}*/
+
 
 void BST::searchTitleMenu(string title, Node *curr) {
     if (curr == nullptr) {
@@ -99,7 +126,6 @@ void BST::searchKey(string key, Node *curr) {
     searchKey(key, curr->right);
 }
 
-
 void BST::searchChannel(string chan, Node *curr) {
     if(curr == nullptr) {
         return; //make sure to clear chanVids before using it again
@@ -116,7 +142,7 @@ void BST::searchByViewRange(int min, int max, Node *curr) {
     if (curr == nullptr) {
         return;
     }
-    if (min <= curr->views && curr->views < max) {
+    if (min <= curr->views && curr->views <= max) {
         vids.push_back(curr);
     }
     searchByViewRange(min, max, curr->left);
@@ -161,7 +187,7 @@ Node* BST::readFile() {
     }
     if(file.is_open()) {
         getline(file, read); //get rid of title line
-        while(!file.fail() && i < 20) {
+        while(!file.fail() && i < 100001) {
             getline(file, read);
             istringstream stream(read);
 
@@ -171,6 +197,7 @@ Node* BST::readFile() {
 
             //Title
             getline(stream, data, '\t');
+            //data.erase(remove_if(data.begin(), data.end(), [](char c) { return !isprint(c); } ), data.end());
             title = data;
 
             //Channel Name
@@ -196,6 +223,7 @@ Node* BST::readFile() {
                 }
             }
             catch(exception &err) {
+                cout << title << endl;
                 cout << i << endl;
                 cout << "Failed to convert time of day to an int." << endl;
             }
