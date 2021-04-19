@@ -1,47 +1,5 @@
 #pragma once
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <sstream>
-using namespace std;
-
-class Node {
-public:
-    string trending;
-    string title;
-    string channel;
-    string published;
-    string time;
-    string day;
-    int views;
-    int likes;
-    int dislikes;
-    int comments;
-    Node *left;
-    Node *right;
-    Node();
-    ~Node();
-    Node(string trend, string tile, string chan, string pub, string tm, string da, int v, int ls, int dls, int cc) : trending(trend), title(tile), channel(chan), published(pub), time(tm), day(da), views(v), likes(ls), dislikes(dls), comments(cc) {}
-};
-
-Node::Node() {
-    trending = "";
-    title = "";
-    channel = "";
-    published = "";
-    time = "";
-    day = "";
-    views = 0;
-    likes = 0;
-    dislikes = 0;
-    comments = 0;
-    left = nullptr;
-    right = nullptr;
-}
-
-Node::~Node() {
-
-}
+#include "Node.h"
 
 class BST {
 private:
@@ -52,13 +10,14 @@ public:
     vector<Node*> keyVids;
     vector<Node*> chanVids;
     vector<Node*> viewsRange;
-    void insertByViews(Node*, Node*);
-    Node* searchTitle(string&, int&, Node*);
-    void searchTitle(string&, Node*);
-    void searchKey(string&, Node*);
-    void searchByViewRange(int&, int&, Node*);
-    void searchChannel(string&, Node*);
-    void readFile();
+    Node* insert(string, string, string, string, string, string, int, int, int, int, Node*);
+    //bool searchTitle(string, Node*);
+    void searchTitleMenu(string, Node*);
+    void searchKey(string, Node*);
+    void searchByViewRange(int, int, Node*);
+    void searchChannel(string, Node*);
+    void printInfo(Node*);
+    Node* readFile();
     ifstream file;
 };
 
