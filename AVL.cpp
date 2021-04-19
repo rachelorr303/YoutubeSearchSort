@@ -38,26 +38,17 @@ Node* AvlTree::rightRotation(Node* node) {
     return newNode;
 }
 
-Node* AvlTree::searchTitle(string t, int v, Node* node){
+void AvlTree::searchTitle(string t, Node* node, bool& found) {
     if(node == nullptr) {
-        return nullptr;
-    }
-    else if(node->title == t)
-        return node;
-    else if(v < node->views)
-        return searchTitle(t, v, node->left);
-    else
-        return searchTitle(t, v, node->right);
-}
-
-void AvlTree::searchTitle2(string t, Node* node) {
-    if(node == nullptr)
+        //cout << "Title not found" << endl;
         return;
+    }
     else if(node->title == t) {
         printInfo(node);
+        found = true;
     }
-    searchTitle2(t, node->left);
-    searchTitle2(t, node->right);
+    searchTitle(t, node->left, found);
+    searchTitle(t, node->right, found);
 }
 
 void AvlTree::searchWord(string key, Node* node){
@@ -88,9 +79,11 @@ void AvlTree::searchViews(int max, int min, Node* node) {
     searchViews(max, min, node->right);
 }
 
-Node* AvlTree::insertViews(string trend, string title_, string chan, string pub, string t, string d, long v, long l, long dl, int c, vector<string> tag, Node* rootNode){
-    if(searchTitle(title_, v, rootNode) != nullptr) { // check if title already exists
-        cout << "unsuccessful" << endl;
+Node* AvlTree::insertViews(string trend, string title_, string chan, string pub, string t, string d, long v, long l, long dl, int c, Node* rootNode){
+    bool found = false;
+    searchTitle(title_, rootNode, found);
+    if(found) { // check if title already exists
+        cout << "Video already exists" << endl;
         return rootNode;
     }
 
@@ -103,11 +96,11 @@ Node* AvlTree::insertViews(string trend, string title_, string chan, string pub,
         cout << "successful" << endl;
         return insertion;
     }
-    else if (v < rootNode->views) {
-        rootNode->left = insertViews(trend, title_, chan, pub, t, d, v, l, dl, c, tag, rootNode->left);
+    else if (v < rootNode->views) { // should i do <= ??
+        rootNode->left = insertViews(trend, title_, chan, pub, t, d, v, l, dl, c, rootNode->left);
     }
     else if (v > rootNode->views)
-        rootNode->right = insertViews(trend, title_, chan, pub, t, d, v, l, dl, c, tag, rootNode->right);
+        rootNode->right = insertViews(trend, title_, chan, pub, t, d, v, l, dl, c, rootNode->right);
 
     // BALANCE
     int BF = findBF(rootNode);
@@ -130,21 +123,75 @@ Node* AvlTree::insertViews(string trend, string title_, string chan, string pub,
 
 void AvlTree::printInfo(Node* node) {
     string newT = "";
-    newT = node->trending.substr(5, 2) + "/" + node->trending.substr(8, 2) + "/" + node->trending.substr(2, 2);
+    newT = node->trending.substr(3, 2) + "/" + node->trending.substr(6, 2) + "/" + node->trending.substr(0, 2);
     string newP = "";
-    newP = node->published.substr(6,2) + "/" + node->published.substr(3, 2) + "/" + node->published.substr(0, 2);
+    if(node->published.length() == 10)
+        newP = node->published.substr(0, 6) + node->published.substr(8, 2);
 
     cout << node->title << " published by " << node->channel << endl;
     cout << "Views: " << node->views << endl;
     cout << "Likes: " << node->likes << endl;
     cout << "Dislikes: " << node->dislikes << endl;
     cout << "Number of comments: " << node->comments << endl;
-    cout << "Published: " << node->day << " " << node->time << ", " << newP << endl; // need to format
+    if(node->published.length() < 10) {
+        cout << "Published: " << node->day << " " << node->time << ", " << node->published << endl; // need to format
+    }
+    else
+        cout << "Published: " << node->day << " " << node->time << ", " << newP << endl;
     cout << "Trending on: " << newT << endl;
 }
 
+void AvlTree::getStats(vector<Node*> group) {
+    cout << "Stats for " << group.size() << " videos:" << endl;
+    int avgViews = 0;
+    int avgLikes = 0;
+    int avgDislikes = 0;
+    int avgComments = 0;
+    unordered_map<string, int> dow;
+    unordered_map<string, int> tod;
+    for(int i = 0; i < group.size(); i++) {
+        avgViews += group[i]->views;
+        avgLikes += group[i]->likes;
+        avgDislikes += group[i]->dislikes;
+        avgComments += group[i]->comments;
+        ++dow[group[i]->day];
+        ++tod[group[i]->time];
+    }
+    avgViews = avgViews/ group.size();
+    cout << "Average views: " << avgViews << endl;
+
+    avgLikes = avgLikes / group.size();
+    cout << "Average likes: " << avgLikes << endl;
+
+    avgDislikes = avgDislikes / group.size();
+    cout << "Average dislikes: " << avgDislikes << endl;
+
+    cout << "Like to dislike ratio: " << avgLikes/avgDislikes << endl;
+
+    avgComments = avgComments / group.size();
+    cout << "Average comments: " << avgComments << endl;
+
+    int max = 0;
+    string maxKey;
+    for(auto iter = dow.begin(); iter != dow.end(); iter++) {
+        if(iter->second > max) {
+            maxKey = iter->first;
+            max = iter->second;
+        }
+    }
+    cout << "Most common day of the week to post: " << maxKey << endl;
+
+    max = 0;
+    maxKey = "";
+    for(auto iter2 = tod.begin(); iter2 != tod.end(); iter2++) {
+        if(iter2->second > max) {
+            maxKey = iter2->first;
+            max = iter2->second;
+        }
+    }
+    cout << "Most common time of day to post: " << maxKey << endl;
+}
 
 AvlTree::AvlTree() {
     root = nullptr;
 }
-
