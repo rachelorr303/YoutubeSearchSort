@@ -59,17 +59,23 @@ void BST::getStats(vector<Node*> group) {
     cout << "Most common time of day to post: " << maxKey << endl;
 }
 
+bool BST::titleExist(string title, Node* node) {
+    if(node == nullptr)
+        return false;
+    if(node->title == title)
+        return true;
+    bool res1 = titleExist(title, node->left);
+    if(res1)
+        return true;
+    return titleExist(title, node->right);
+}
+
 Node* BST::insert(string trend, string title, string chan, string pub, string time, string day, int views, int likes, int dislikes, int comments, Node *curr) {
+    if(titleExist(title, curr)) {
+        return curr;
+    }
     if (curr == nullptr) {
         return new Node(trend, title, chan, pub, time, day, views, likes, dislikes, comments);
-    }
-    if(curr->title == title) {
-        curr->trending = trend;
-        curr->views = views;
-        curr->likes = likes;
-        curr->dislikes = dislikes;
-        curr->comments = comments;
-        return curr;
     }
     if(views <= curr->views) { // <= in the event two unique videos coincidentally have the same view count
         curr->left = insert(trend, title, chan, pub, time, day, views, likes, dislikes, comments, curr->left);
@@ -79,29 +85,6 @@ Node* BST::insert(string trend, string title, string chan, string pub, string ti
     }
     return curr;
 }
-
-/*string BST::searchDupe(string trend, string title, string chan, int views, int likes, int dislikes, int comments, Node *curr) {
-    string msg;
-    if (curr == nullptr) {
-        return "";
-    }
-    else if(curr->title==title && curr->channel==chan) {
-        curr->trending = trend;
-        curr->views = views;
-        curr->likes = likes;
-        curr->dislikes = dislikes;
-        curr->comments = comments;
-        msg = "found";
-    }
-    else if(views < curr->views) {
-        msg += searchDupe(trend, title, chan, views, likes, dislikes, comments, curr->left);
-    }
-    else {
-        msg += searchDupe(trend, title, chan, views, likes, dislikes, comments, curr->right);
-    }
-    return msg;
-}*/
-
 
 void BST::searchTitle(string title, Node *curr) {
     if (curr == nullptr) {
@@ -132,7 +115,6 @@ void BST::searchChannel(string chan, Node *curr) {
     }
     if(curr->channel==chan) {
         vids.push_back(curr);
-        printInfo(curr);
     }
     searchChannel(chan, curr->left);
     searchChannel(chan, curr->right);

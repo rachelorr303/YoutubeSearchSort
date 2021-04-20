@@ -55,6 +55,7 @@ void AvlTree::searchWord(string key, Node* node){
         return;
     else if(node->title.find(key) != string::npos) {
         vids.push_back(node);
+        printInfo(node);
     }
     searchWord(key, node->left);
     searchWord(key, node->right);
@@ -70,12 +71,14 @@ void AvlTree::searchChannel(string chan, Node* node) {
 }
 
 void AvlTree::searchViews(int min, int max, Node* node) {
-    if(node == nullptr)
+    if (node == nullptr) {
         return;
-    else if(node->views < max && node->views > min)
+    }
+    if (min <= node->views && node->views <= max) {
         vids.push_back(node);
-    searchViews(max, min, node->left);
-    searchViews(max, min, node->right);
+    }
+    searchViews(min, max, node->left);
+    searchViews(min, max, node->right);
 }
 
 bool AvlTree::titleExist(string title_, Node* node) {
@@ -125,10 +128,10 @@ Node* AvlTree::insertViews(string trend, string title_, string chan, string pub,
 
 void AvlTree::printInfo(Node* node) {
     string newT = "";
-    newT = node->trending.substr(3, 2) + "/" + node->trending.substr(6, 2) + "/" + node->trending.substr(0, 2);
+    newT = node->trending.substr(6, 2) + "/" + node->trending.substr(3, 2) + "/20" + node->trending.substr(0, 2);
     string newP = "";
     if(node->published.length() == 10)
-        newP = node->published.substr(0, 6) + node->published.substr(8, 2);
+        newP = node->published.substr(3,2) + "/" + node->published.substr(0, 2) + "/" + node->published.substr(6, 4);
 
     cout << node->title << " published by " << node->channel << endl;
     cout << "Views: " << node->views << endl;
@@ -141,7 +144,7 @@ void AvlTree::printInfo(Node* node) {
     else
         cout << "Published: " << node->day << " " << node->time << ", " << newP << endl;
     cout << "Trending on: " << newT << endl;
-    cout << "\n" << endl;
+    cout << endl;
 }
 
 void AvlTree::getStats(vector<Node*> group) {
@@ -219,7 +222,7 @@ Node* AvlTree::readFile() {
     }
     if(file.is_open()) {
         getline(file, read); //get rid of title line
-        while(!file.fail() && i < 100000) {
+        while(!file.fail() && i < 100001) {
             getline(file, read);
             istringstream stream(read);
 

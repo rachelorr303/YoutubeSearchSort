@@ -14,7 +14,7 @@ public:
     void searchTitle(string t, Node* node);
     void searchWord(string key, Node* node);
     void searchChannel(string chan, Node* node);
-    void searchViews(int max, int min, Node* node);
+    void searchViews(int min, int max, Node* node);
     int findLevels(Node* rootNode);
     int findBF(Node* rootNode);
     Node* leftRotation(Node* node);

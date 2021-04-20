@@ -8,6 +8,7 @@ public:
     BST();
     Node *root;
     vector<Node*> vids;
+    bool titleExist(string title, Node* node);
     void getStats(vector<Node*> group);
     void searchTitle(string, Node*);
     void searchKey(string, Node*);
