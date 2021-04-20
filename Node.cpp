@@ -5,7 +5,7 @@ Node::Node() {
     title = "";
     channel = "";
     published = "";
-    time = 0;
+    time = "";
     day = "";
     views = 0;
     likes = 0;
@@ -14,5 +14,3 @@ Node::Node() {
     left = nullptr;
     right = nullptr;
 }
-
-

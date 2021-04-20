@@ -1,7 +1,13 @@
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <unordered_map>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
+#pragma once
 
 class Node {
 public:
@@ -9,9 +15,8 @@ public:
     string title;
     string channel;
     string published;
-    int time;
+    string time;
     string day;
-    vector<string> tags;
     int views;
     int likes;
     int dislikes;
@@ -19,5 +24,6 @@ public:
     Node *left;
     Node *right;
     Node();
-    Node(string trend, string tile, string chan, string pub, int tm, string da, vector<string> tgs, int v, int ls, int dls, int cc) : trending(trend), title(tile), channel(chan), published(pub), time(tm), day(da), tags(tgs), views(v), likes(ls), dislikes(dls), comments(cc) {}
+    Node(string trend, string tile, string chan, string pub, string tm, string da, int v, int ls, int dls, int cc) : trending(trend), title(tile), channel(chan), published(pub), time(tm), day(da), views(v), likes(ls), dislikes(dls), comments(cc), left(nullptr), right(nullptr) {}
 };
+
