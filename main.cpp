@@ -101,6 +101,12 @@ int main() {
         }
     }
     while(input !=5);
+    
+    auto start = high_resolution_clock::now();
+    //code
+    auto stop = high_resolution_clock::now();
+    auto time = duration_cast<microseconds>(stop-start);
+    cout << "Time taken to insert: " << time.count() << " microseconds" << endl;
 
 
     return 0;
